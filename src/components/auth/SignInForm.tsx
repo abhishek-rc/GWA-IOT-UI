@@ -202,9 +202,9 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm" type="submit">
+                  <Link className="bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300" href={"/auth/login"} target="_blank" >
                     Sign in
-                  </Button>
+                  </Link>
                 </div>
               </div>
             </form>

@@ -3,14 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'cloud.smartcommand.com.au',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    domains: ['dev.testcloud.smartcommand.com.au', 'cloud.smartcommand.com.au'],
   },
   webpack(config) {
     config.module.rules.push({
