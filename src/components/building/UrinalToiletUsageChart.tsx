@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useUrinalToiletUsageData } from '@/hooks/useUrinalToiletUsageData';
+import RadialBarChart from '../charts/circle/RadialBarChart';
+
 
 // Define props interface
 interface UrinalToiletUsageChartProps {
@@ -15,17 +17,9 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
   weekInterval = 4,
   buildingName = 'Building'
 }) => {
-  // State for client-side rendering
-  const [isBrowser, setIsBrowser] = useState(false);
-  
   // Data fetching
   const { data, isLoading, isError, error } = useUrinalToiletUsageData(facilityId, weekInterval);
   
-  // Initialize chart only on client-side
-  useEffect(() => {
-    setIsBrowser(true);
-  }, []);
-
   // Chart container with consistent styling
   const renderContainer = (content: React.ReactNode) => (
     <div className="border h-118 mt-6 border-gray-200 rounded-lg overflow-hidden">
@@ -41,7 +35,7 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
     return <div className="p-6 text-center text-gray-500">Select a building to view urinal vs toilet usage data</div>;
   }
   
-  if (!isBrowser || isLoading) {
+  if (isLoading) {
     return (
       <div className="p-6 text-center">
         <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto"></div>
@@ -76,94 +70,20 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
   
   // Check if data is empty (both values are 0)
   const isEmptyData = target === 0 && actual === 0;
-  
-  // Dynamically import ApexCharts only on client side
-  const ApexCharts = require('react-apexcharts').default;
 
-  // Render chart with data
+  // Render chart with data using the reusable RadialBarChart component
   return renderContainer(
-    <div className="h-80 relative">
-      {isBrowser && (
-        <>
-          <ApexCharts
-            options={{
-              chart: {
-                type: 'radialBar',
-                toolbar: { show: false }
-              },
-              colors: ['#001f38', '#f9d56e'], // Dark blue for actual (outer), Gold for target (inner)
-              stroke: {
-                lineCap: 'round'
-              },
-              plotOptions: {
-                radialBar: {
-                  startAngle: 0,
-                  endAngle: 360,
-                  hollow: {
-                    margin: 0,
-                    size: '40%',
-                    background: 'transparent'
-                  },
-                  track: {
-                    show: true,
-                    background: ["rgba(0,31,56,0.3)", "rgba(231,202,75,0.3)"], // Semi-transparent background for unfilled portion
-                    strokeWidth: '97%',
-                    opacity: 1,
-                    margin: 5,
-                    dropShadow: {
-                      enabled: false
-                    }
-                  },
-                  dataLabels: {
-                    name: {
-                      show: false
-                    },
-                    value: {
-                      show: true,
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      offsetY: 8
-                    },
-                    total: {
-                      show: true,
-                      label: 'Usage',
-                      color: '#373d3f',
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      formatter: function() {
-                        return isEmptyData ? 'No Data' : `${actual.toFixed(1)}%`;
-                      }
-                    }
-                  }
-                }
-              },
-              labels: ['Actual', 'Target'],
-              legend: {
-                show: false // Hide default legend, we'll use our custom one
-              },
-              tooltip: {
-                enabled: !isEmptyData,
-                y: { formatter: (value: number) => `${value.toFixed(1)}%` }
-              }
-            }}
-            series={[actual, target]}
-            type="radialBar"
-            height="100%"
-          />
-          
-          {/* Custom legend with flex column layout at bottom left */}
-          <div className="absolute  left-7 flex flex-col space-y-2">
-            <div className="flex items-center">
-              <span className="inline-block w-5 h-5 rounded-full bg-[#001f38] mr-2"></span>
-              <span className="text-md font-medium">Actual</span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block w-5 h-5 rounded-full bg-[#f9d56e] mr-2"></span>
-              <span className="text-md font-medium">Target</span>
-            </div>
-          </div>
-        </>
-      )}
+    <div className="h-80">
+      <RadialBarChart
+        actual={actual}
+        target={target}
+        isEmptyData={isEmptyData}
+        actualLabel="Actual"
+        targetLabel="Target"
+        actualColor="#001f38" // Dark blue
+        targetColor="#f9d56e" // Gold
+        height="100%"
+      />
     </div>
   );
 };
