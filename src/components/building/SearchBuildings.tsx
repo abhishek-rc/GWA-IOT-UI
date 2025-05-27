@@ -17,6 +17,16 @@ const SearchBuildings: React.FC<SearchBuildingsProps> = ({ onBuildingSelect }) =
   // Use TanStack Query to fetch building data
   const { data: apiBuildings } = useBuildingData();
   
+  // Save selected building to local storage when it changes
+  useEffect(() => {
+    if (selectedBuilding) {
+      localStorage.setItem('selectedBuilding', JSON.stringify({
+        id: selectedBuilding.id,
+        name: selectedBuilding.name
+      }));
+    }
+  }, [selectedBuilding]);
+
   // Load buildings from API when available
   useEffect(() => {
     if (apiBuildings) {
@@ -143,30 +153,10 @@ const SearchBuildings: React.FC<SearchBuildingsProps> = ({ onBuildingSelect }) =
         )}
       </div>
       
-      {/* Selected Building Details */}
+      {/* Save selected building to local storage when changed */}
       {selectedBuilding && (
-        <div className="mb-8 p-6 border border-gray-200 rounded-lg mt-6">
-          <h2 className="text-xl font-bold mb-4">{selectedBuilding.name} Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Building Information</h3>
-              <div className="space-y-2">
-                <p><span className="font-medium">ID:</span> {selectedBuilding.id}</p>
-                <p><span className="font-medium">Address:</span> {selectedBuilding.address}</p>
-                <p><span className="font-medium">Total Area:</span> {selectedBuilding.totalArea.toLocaleString()} sq ft</p>
-                <p><span className="font-medium">Floors:</span> {selectedBuilding.floors}</p>
-                <p><span className="font-medium">Last Updated:</span> {selectedBuilding.lastUpdated.toLocaleString()}</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Usage Metrics</h3>
-              <div className="space-y-2">
-                <p><span className="font-medium">Energy Usage:</span> {selectedBuilding.energyUsage.toLocaleString()} kWh</p>
-                <p><span className="font-medium">Water Usage:</span> {selectedBuilding.waterUsage.toLocaleString()} gallons</p>
-                <p><span className="font-medium">Occupancy Rate:</span> {selectedBuilding.occupancy}%</p>
-              </div>
-            </div>
-          </div>
+        <div className="hidden">
+          {/* This is just a placeholder - actual saving happens in the useEffect */}
         </div>
       )}
     </div>
