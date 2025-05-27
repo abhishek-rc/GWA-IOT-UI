@@ -22,7 +22,7 @@ export const useWaterSavingsData = (facilityId: string, options?: { enabled?: bo
  * @param facilityId - The ID of the facility to calculate savings for
  * @returns Object containing total savings, loading state, error, and prefetch function
  */
-export const useTotalWaterSavings = (facilityId: string) => {
+export const useTotalWaterSavings = (facilityId: string | null) => {
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useWaterSavingsData(facilityId);
   

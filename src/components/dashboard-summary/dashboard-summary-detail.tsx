@@ -5,7 +5,7 @@ import { useWaterSavingsData } from '@/hooks/useDashboardSummary';
 
 interface DashboardSummaryDetailsProps {
   selectedMetric: MetricType;
-  facilityId: string;
+  facilityId: string | null;
 }
 
 const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
