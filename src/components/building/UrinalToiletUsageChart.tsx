@@ -32,11 +32,6 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
       <div className="bg-gradient-to-b from-[#001f38] to-[#001f38] text-white p-4">
         <h2 className="text-xl font-medium">Urinals vs Toilets (Male)</h2>
       </div>
-      <div className="px-4 py-2">
-        <div>
-          <p className="text-gray-600">Target vs Actual Usage</p>
-        </div>
-      </div>
       {content}
     </div>
   );
@@ -87,62 +82,87 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
 
   // Render chart with data
   return renderContainer(
-    <div className="h-80">
+    <div className="h-80 relative">
       {isBrowser && (
-        <ApexCharts
-          options={{
-            chart: {
-              type: 'donut',
-              toolbar: { show: false }
-            },
-            colors: isEmptyData ? ['#d1d5db', '#e5e7eb'] : ['#001f38', '#f9d56e'],
-            labels: ['Target', 'Actual'],
-            dataLabels: { enabled: false },
-            legend: {
-              position: 'bottom',
-              fontSize: '14px',
-              fontFamily: 'Inter, sans-serif',
-              markers: {
-                width: 12,
-                height: 12,
-                radius: 12
+        <>
+          <ApexCharts
+            options={{
+              chart: {
+                type: 'radialBar',
+                toolbar: { show: false }
               },
-              itemMargin: {
-                horizontal: 10,
-                vertical: 0
-              }
-            },
-            plotOptions: {
-              pie: {
-                donut: {
-                  size: '70%',
-                  labels: {
+              colors: ['#001f38', '#f9d56e'], // Dark blue for actual (outer), Gold for target (inner)
+              stroke: {
+                lineCap: 'round'
+              },
+              plotOptions: {
+                radialBar: {
+                  startAngle: 0,
+                  endAngle: 360,
+                  hollow: {
+                    margin: 0,
+                    size: '40%',
+                    background: 'transparent'
+                  },
+                  track: {
                     show: true,
-                    name: { show: false },
+                    background: ["rgba(0,31,56,0.3)", "rgba(231,202,75,0.3)"], // Semi-transparent background for unfilled portion
+                    strokeWidth: '97%',
+                    opacity: 1,
+                    margin: 5,
+                    dropShadow: {
+                      enabled: false
+                    }
+                  },
+                  dataLabels: {
+                    name: {
+                      show: false
+                    },
                     value: {
                       show: true,
-                      fontSize: '22px',
+                      fontSize: '16px',
                       fontWeight: 600,
-                      color: isEmptyData ? '#9ca3af' : '#f9d56e',
+                      offsetY: 8
+                    },
+                    total: {
+                      show: true,
+                      label: 'Usage',
+                      color: '#373d3f',
+                      fontSize: '16px',
+                      fontWeight: 600,
                       formatter: function() {
                         return isEmptyData ? 'No Data' : `${actual.toFixed(1)}%`;
                       }
-                    },
-                    total: { show: false }
+                    }
                   }
                 }
+              },
+              labels: ['Actual', 'Target'],
+              legend: {
+                show: false // Hide default legend, we'll use our custom one
+              },
+              tooltip: {
+                enabled: !isEmptyData,
+                y: { formatter: (value: number) => `${value.toFixed(1)}%` }
               }
-            },
-            stroke: { width: 0 },
-            tooltip: {
-              enabled: !isEmptyData,
-              y: { formatter: (value: number) => `${value.toFixed(1)}%` }
-            }
-          }}
-          series={[target, actual]}
-          type="donut"
-          height="100%"
-        />
+            }}
+            series={[actual, target]}
+            type="radialBar"
+            height="100%"
+          />
+          
+          {/* Custom legend with flex column layout at bottom left */}
+          <div className="absolute  left-7 flex flex-col space-y-2">
+            <div className="flex items-center">
+              <span className="inline-block w-5 h-5 rounded-full bg-[#001f38] mr-2"></span>
+              <span className="text-md font-medium">Actual</span>
+            </div>
+            <div className="flex items-center">
+              <span className="inline-block w-5 h-5 rounded-full bg-[#f9d56e] mr-2"></span>
+              <span className="text-md font-medium">Target</span>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
