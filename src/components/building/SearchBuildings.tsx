@@ -93,7 +93,7 @@ const SearchBuildings: React.FC<SearchBuildingsProps> = ({ onBuildingSelect }) =
   };
 
   return (
-    <div className="mb-8 w-100">
+    <div className="col-span-12 space-y-6 xl:col-span-7">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Building Search</h2>
       </div>
