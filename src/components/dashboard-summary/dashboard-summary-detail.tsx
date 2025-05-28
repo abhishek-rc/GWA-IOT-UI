@@ -5,7 +5,7 @@ import { useWaterSavingsData } from '@/hooks/useDashboardSummary';
 
 interface DashboardSummaryDetailsProps {
   selectedMetric: MetricType;
-  facilityId: string;
+  facilityId: string | null;
 }
 
 const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
@@ -13,7 +13,7 @@ const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
   facilityId,
 }) => {
 
-  const { data: waterSavingsData } = useWaterSavingsData(facilityId);
+  const { data } = useWaterSavingsData(facilityId);
   const renderContent = () => {
     switch (selectedMetric) {
       case 'waterSavings':
@@ -35,7 +35,7 @@ const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
                     />
                   </div>
                   <div className="flex-grow">
-                    <div className="font-medium text-blue-900">{waterSavingsData?.halfFlushingSaving?.toFixed(2)} kL Saved</div>
+                    <div className="font-medium text-blue-900">{data?.waterSavingsData?.halfFlushingSaving?.toFixed(2)} kL Saved</div>
                     <div className="text-sm text-gray-400">Monitored Half Flushing</div>
                   </div>
                   <button className="text-gray-400 hover:text-gray-600">
@@ -58,7 +58,7 @@ const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
                     />
                   </div>
                   <div className="flex-grow">
-                    <div className="font-medium text-blue-900">{waterSavingsData?.urinalUseOverToiletSaving?.toFixed(2)} kL Saved</div>
+                    <div className="font-medium text-blue-900">{data?.waterSavingsData?.urinalUseOverToiletSaving?.toFixed(2)} kL Saved</div>
                     <div className="text-sm text-gray-400">Monitored urinal use over toilet</div>
                   </div>
                   <button className="text-gray-400 hover:text-gray-600">
@@ -81,7 +81,7 @@ const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
                     />
                   </div>
                   <div className="flex-grow">
-                    <div className="font-medium text-blue-900">{waterSavingsData?.useOfSmartShowerSaving?.toFixed(2)} kL Saved</div>
+                    <div className="font-medium text-blue-900">{data?.waterSavingsData?.useOfSmartShowerSaving?.toFixed(2)} kL Saved</div>
                     <div className="text-sm text-gray-400">By the use of smart showers</div>
                   </div>
                   <button className="text-gray-400 hover:text-gray-600">
@@ -104,7 +104,7 @@ const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
                     />
                   </div>
                   <div className="flex-grow">
-                    <div className="font-medium text-blue-900">{waterSavingsData?.configureSmartFixtureSaving?.toFixed(2)} kL Saved</div>
+                    <div className="font-medium text-blue-900">{data?.waterSavingsData?.configureSmartFixtureSaving?.toFixed(2)} kL Saved</div>
                     <div className="text-sm text-gray-400">By configuring smart fixtures</div>
                   </div>
                   <button className="text-gray-400 hover:text-gray-600">
@@ -127,7 +127,7 @@ const DashboardSummaryDetails: React.FC<DashboardSummaryDetailsProps> = ({
                     />
                   </div>
                   <div className="flex-grow">
-                    <div className="font-medium text-blue-900">{waterSavingsData?.ecoValveLeakDetectionSaving?.toFixed(2)} kL Saved</div>
+                    <div className="font-medium text-blue-900">{data?.waterSavingsData?.ecoValveLeakDetectionSaving?.toFixed(2)} kL Saved</div>
                     <div className="text-sm text-gray-400">By eco valve leak detection</div>
                   </div>
                   <button className="text-gray-400 hover:text-gray-600">

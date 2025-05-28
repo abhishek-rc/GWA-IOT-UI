@@ -1,3 +1,4 @@
+// import { auth0 } from '@/lib/auth0';
 import { NextResponse } from 'next/server';
 
 /**
@@ -11,13 +12,18 @@ export async function GET(
   try {
     // Await the params before accessing its properties
     const { facilityId } = await params;
-    
+
     if (!facilityId) {
       return NextResponse.json({ error: 'facilityId is required' }, { status: 400 });
     }
-    
+    // const session = await auth0.getSession();
+    // let accessToken;
+    // if (session) {
+    //   accessToken = session.tokenSet.accessToken;
+    // }
+
     const API_URL = `https://apim-scmd-aueast-devtest-kjdn.azure-api.net/dashservice/api/EstimatedWaterSaving/${facilityId}`;
-    
+
     const response = await fetch(API_URL, {
       method: 'GET',
       headers: {
@@ -27,7 +33,7 @@ export async function GET(
       },
       cache: 'no-store'
     });
-    
+
     if (!response.ok) {
       const errorDetail = await response.text().catch(() => 'Unknown error');
       return NextResponse.json(
@@ -41,7 +47,7 @@ export async function GET(
   } catch (error) {
     console.error('Error in water savings API route:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Internal server error',
         message: error instanceof Error ? error.message : String(error)
       },

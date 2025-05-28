@@ -9,11 +9,15 @@ import AvgWaterPerVisitChart from '@/components/building/AvgWaterPerVisitChart';
 import HalfFlushPercentageChart from '@/components/building/HalfFlushPercentageChart';
 import { useBuildingData } from '@/hooks/useBuildingData';
 import DashboardSummary from '@/components/dashboard-summary/dashboard-summary';
+import BuildingSearchWrapper from '@/components/building/BuildingSearchWrapper';
+import { EcoValueTable } from '@/components/eco-value-table/ecoValueTable';
+import { AlertWarningsTable } from '@/components/alert-warnings-table/alertsWarningsTable';
 
 // Interface for stored building data
 interface StoredBuilding {
   id: string;
   name: string;
+  customerId: string;
 }
 
 export default function Ecommerce() {
@@ -26,7 +30,7 @@ export default function Ecommerce() {
   useEffect(() => {
     // Try to get from localStorage first
     const storedBuildingJson = localStorage.getItem('selectedBuilding');
-    
+
     if (storedBuildingJson) {
       try {
         const storedBuilding = JSON.parse(storedBuildingJson);
@@ -38,31 +42,32 @@ export default function Ecommerce() {
       // If no stored building but we have buildings data, set first one as default
       const defaultBuilding = {
         id: buildings[0].id,
-        name: buildings[0].name
+        name: buildings[0].name,
+        customerId: buildings[0].customerId
       };
       setSelectedBuilding(defaultBuilding);
       localStorage.setItem('selectedBuilding', JSON.stringify(defaultBuilding));
     }
   }, [buildings, isLoading]);
 
-  // const handleBuildingSelect = (building: any) => {
-  //   const newSelectedBuilding = {
-  //     id: building.id,
-  //     name: building.name
-  //   };
-  //   setSelectedBuilding(newSelectedBuilding);
-  //   localStorage.setItem('selectedBuilding', JSON.stringify(newSelectedBuilding));
-  // };
+  const handleBuildingSelect = (building: any) => {
+    const newSelectedBuilding = {
+      id: building.id,
+      name: building.name,
+      customerId: building.customerId
+    };
+    setSelectedBuilding(newSelectedBuilding);
+    localStorage.setItem('selectedBuilding', JSON.stringify(newSelectedBuilding));
+  };
 
   return (
     <div className="container mx-auto px-4">
-      {/* Building Search Section
       <div className="mb-6">
         <BuildingSearchWrapper onBuildingSelect={handleBuildingSelect} />
-      </div> */}
+      </div>
 
       <div className="col-span-12 space-y-6">
-          <DashboardSummary />
+          {selectedBuilding && <DashboardSummary facilityId={selectedBuilding.id} buildingName={selectedBuilding?.name}/>}
       </div>
       
       {/* Main Content Area - First Row */}
@@ -77,7 +82,7 @@ export default function Ecommerce() {
             </div>
           )}
         </div>
-        
+
         {/* Right side panel with Urinal vs Toilet Usage Chart */}
         <div className="col-span-12 lg:col-span-4">
           {selectedBuilding ? (
@@ -139,6 +144,26 @@ export default function Ecommerce() {
             </div>
           )}
         </div>
+      </div>
+      <div>
+        {selectedBuilding && (
+          <EcoValueTable
+            facilityId={selectedBuilding.id}
+            buildingName={selectedBuilding.name}
+            weekInterval={4}
+          />
+        )}
+      </div>
+      <div>
+        {
+          selectedBuilding && (
+            <AlertWarningsTable
+              facilityId={selectedBuilding.id}
+              userId={selectedBuilding.customerId}
+              buildingName={selectedBuilding.name}
+            />
+          )
+        }
       </div>
     </div>
   );

@@ -23,7 +23,8 @@ export const useBuildingData = () => {
         energyUsage: parseFloat(item.energyUsage) || 0,
         waterUsage: parseFloat(item.waterUsage) || 0,
         occupancy: parseFloat(item.occupancy) || 0,
-        lastUpdated: item.lastUpdated ? new Date(item.lastUpdated) : new Date()
+        lastUpdated: item.lastUpdated ? new Date(item.lastUpdated) : new Date(),
+        customerId: item.customerId || item.id || ''
       }));
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

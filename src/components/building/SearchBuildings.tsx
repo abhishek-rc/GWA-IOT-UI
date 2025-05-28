@@ -22,7 +22,8 @@ const SearchBuildings: React.FC<SearchBuildingsProps> = ({ onBuildingSelect }) =
     if (selectedBuilding) {
       localStorage.setItem('selectedBuilding', JSON.stringify({
         id: selectedBuilding.id,
-        name: selectedBuilding.name
+        name: selectedBuilding.name,
+        customerId: selectedBuilding.customerId
       }));
     }
   }, [selectedBuilding]);

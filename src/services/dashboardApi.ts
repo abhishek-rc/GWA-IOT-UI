@@ -11,33 +11,72 @@ export interface WaterSavingsData {
   urinalToiletActivationRatio: number;
 }
 
-export const fetchWaterSavingsData = async (facilityId: string): Promise<WaterSavingsData> => {
+export const getEstimatedWaterSavingsData = async (facilityId: string | null) => {
   try {
+    // Make API call to get water savings data
     const response = await fetch(`/api/water-savings/${facilityId}`);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
     const data = await response.json();
-
-    return data[0] as WaterSavingsData;
+    
+    if (!data || !data[0]) {
+      return {
+        estimatedWaterSavingsData: [],
+        waterSavingsData: {},
+        cardState: 'grey'
+      };
+    }
+    
+    const waterSavingsData = data[0];
+    
+    // Calculate total water savings from multiple sources
+    let totalWaterSavings = 0;
+    totalWaterSavings += waterSavingsData.halfFlushingSaving || 0;
+    totalWaterSavings += waterSavingsData.urinalUseOverToiletSaving || 0;
+    totalWaterSavings += waterSavingsData.useOfSmartShowerSaving || 0;
+    totalWaterSavings += waterSavingsData.configureSmartFixtureSaving || 0;
+    totalWaterSavings += waterSavingsData.ecoValveLeakDetectionSaving || 0;
+  
+    const totalWaterSavingsFinalValue = Math.round(totalWaterSavings) > 99999 ? 
+      totalWaterSavings / 1000 : totalWaterSavings;
+    const totalWaterSavingsFinalUnit = Math.round(totalWaterSavings) > 99999 ? 'ML' : 'kL';
+    
+    return {
+      estimatedWaterSavingsData: [{
+        StatValue: Math.round(totalWaterSavingsFinalValue).toString(),
+        StatDescription: totalWaterSavingsFinalUnit
+      }],
+      waterSavingsData,
+      cardState: 'green_stats'
+    };
   } catch (error) {
-    console.error('Error fetching water savings data:', error);
-    throw error;
+    console.error("Error fetching estimated water savings:", error);
+    return {
+      estimatedWaterSavingsData: [],
+      waterSavingsData: {},
+      cardState: 'grey'
+    };
   }
 };
 
-export const calculateTotalWaterSavings = (data: WaterSavingsData): number => {
-  const halfFlushingSaving = Math.round(data.halfFlushingSaving * 100) / 100;
-  const urinalUseOverToiletSaving = Math.round(data.urinalUseOverToiletSaving * 100) / 100;
-  const useOfSmartShowerSaving = Math.round(data.useOfSmartShowerSaving * 100) / 100;
-  const configureSmartFixtureSaving = Math.round(data.configureSmartFixtureSaving * 100) / 100;
-  const ecoValveLeakDetectionSaving = Math.round(data.ecoValveLeakDetectionSaving * 100) / 100;
+
+export const getCarbonImpactOffsetData = (estimatedWaterData: { StatValue: string; StatDescription: string }[]) => {
+  // Carbon impact is calculated based on estimated water savings
+  // No direct API call needed - it uses data from the Estimated Water Savings card
   
-  return halfFlushingSaving + 
-         urinalUseOverToiletSaving + 
-         useOfSmartShowerSaving + 
-         configureSmartFixtureSaving + 
-         ecoValveLeakDetectionSaving;
+  if (!estimatedWaterData || !estimatedWaterData.length) {
+    return {
+      carbonImpactData: 0,
+      carbonOffsetData: 0,
+      cardState: 'green_stats'
+    };
+  }
+  
+  const parsedCarbonImpact = parseInt(estimatedWaterData[0]?.StatValue) || 0;
+  const carbonImpactData = parsedCarbonImpact * 0.89;
+  const carbonOffsetData = carbonImpactData * 0.02;
+  
+  return {
+    carbonImpactData,
+    carbonOffsetData,
+    cardState: 'green_stats'
+  };
 };

@@ -28,4 +28,7 @@ export interface Building {
   
   /** Last updated timestamp */
   lastUpdated: Date;
+  
+  /** Customer ID associated with the building */
+  customerId: string;
 }

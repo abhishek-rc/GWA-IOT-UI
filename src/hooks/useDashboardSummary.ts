@@ -1,5 +1,5 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchWaterSavingsData, WaterSavingsData, calculateTotalWaterSavings } from '@/services/dashboardApi';
+import { useQuery } from '@tanstack/react-query';
+import { getEstimatedWaterSavingsData, WaterSavingsData, getCarbonImpactOffsetData } from '@/services/dashboardApi';
 
 /**
  * Hook to fetch water savings data for a specific facility
@@ -7,10 +7,17 @@ import { fetchWaterSavingsData, WaterSavingsData, calculateTotalWaterSavings } f
  * @param options - Optional configuration for the query
  * @returns Query result with water savings data
  */
-export const useWaterSavingsData = (facilityId: string, options?: { enabled?: boolean }) => {
-  return useQuery<WaterSavingsData, Error>({
+export const useWaterSavingsData = (facilityId: string | null, options?: { enabled?: boolean }) => {
+  // Define the return type of getEstimatedWaterSavingsData
+  interface WaterSavingsResponse {
+    estimatedWaterSavingsData: { StatValue: string; StatDescription: string }[];
+    waterSavingsData: WaterSavingsData;
+    cardState: string;
+  }
+
+  return useQuery<WaterSavingsResponse, Error>({
     queryKey: ['waterSavings', facilityId],
-    queryFn: () => fetchWaterSavingsData(facilityId),
+    queryFn: () => getEstimatedWaterSavingsData(facilityId),
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
     enabled: facilityId !== '' && (options?.enabled !== false),
@@ -18,35 +25,26 @@ export const useWaterSavingsData = (facilityId: string, options?: { enabled?: bo
 };
 
 /**
- * Hook to calculate total water savings for a facility
- * @param facilityId - The ID of the facility to calculate savings for
- * @returns Object containing total savings, loading state, error, and prefetch function
+ * Hook to get carbon impact data based on water savings data
+ * @param waterSavingsData - The water savings data to calculate carbon impact from
+ * @param options - Optional configuration for the query
+ * @returns Query result with carbon impact data
  */
-export const useTotalWaterSavings = (facilityId: string) => {
-  const queryClient = useQueryClient();
-  const { data, isLoading, error } = useWaterSavingsData(facilityId);
-  
-  const prefetchData = async () => {
-    if (facilityId) {
-      await queryClient.prefetchQuery({
-        queryKey: ['waterSavings', facilityId],
-        queryFn: () => fetchWaterSavingsData(facilityId),
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      });
-    }
-  };
-  
-  // Call prefetch on initial load
-  if (facilityId && !queryClient.getQueryData(['waterSavings', facilityId])) {
-    prefetchData();
+export const useCarbonImpactData = (
+  waterSavingsData: { StatValue: string; StatDescription: string }[] | undefined,
+  options?: { enabled?: boolean }
+) => {
+  interface CarbonImpactResponse {
+    carbonImpactData: number;
+    carbonOffsetData: number;
+    cardState: string;
   }
-  
-  const totalSavings = data ? calculateTotalWaterSavings(data) : 0;
-  
-  return {
-    totalSavings,
-    isLoading,
-    error,
-    prefetchData,
-  };
+
+  return useQuery<CarbonImpactResponse, Error>({
+    queryKey: ['carbonImpact', waterSavingsData],
+    queryFn: () => getCarbonImpactOffsetData(waterSavingsData || []),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    enabled: !!waterSavingsData && (options?.enabled !== false),
+  });
 };
