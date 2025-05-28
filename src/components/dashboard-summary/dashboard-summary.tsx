@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useWaterSavingsData } from '@/hooks/useDashboardSummary';
 import { useCarbonImpactData } from '@/hooks/useDashboardSummary';
+import { useMaintenanceData } from '@/hooks/useDashboardSummary';
 import DashboardSummaryDetails from './dashboard-summary-detail';
 
 export type MetricType = 
@@ -14,11 +15,11 @@ export type MetricType =
   | 'carbonImpact' 
   | 'dolphinSystem' 
 
-  interface DashboardSummaryProps {
-    facilityId: string | null;
-    weekInterval?: number;
-    buildingName?: string;
-  }
+interface DashboardSummaryProps {
+  facilityId: string | null;
+  weekInterval?: number;
+  buildingName?: string;
+}
 
 const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildingName }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('waterSavings');
@@ -27,11 +28,27 @@ const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildin
   const { data: carbonData, isLoading: isLoadingCarbon } = useCarbonImpactData(
     data?.estimatedWaterSavingsData
   );
+  const { data: maintenanceData, isLoading: isLoadingMaintenance } = useMaintenanceData(facilityId);
 
   const handleTileClick = (metricId: MetricType) => {
     setSelectedMetric(metricId);
   };
 
+  console.log(">>>>>MaintenanceData", maintenanceData)
+
+  // Helper function to determine background color based on card state
+  const getMaintenanceCardBgColor = (cardState?: string) => {
+    switch (cardState) {
+      case 'red_stats':
+        return 'bg-red-100 text-red-900';
+      case 'amber_stats':
+        return 'bg-amber-100 text-amber-900';
+      case 'green_stats':
+        return 'bg-emerald-100 text-emerald-900';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
 
   return (
     <div className="space-y-6"> 
@@ -92,26 +109,49 @@ const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildin
               </div>
             </div>
             
-            {/* Maintenance Tile */}
+            {/* Maintenance Issues Tile */}
             <div 
-              className={`bg-emerald-100 text-emerald-900 h-[230px] flex flex-col transition-all duration-200 cursor-pointer ${selectedMetric === 'maintenance' ? 'ring-2 ring-[#1A6988] shadow-lg' : 'hover:shadow-md'}`}
+              className={`${getMaintenanceCardBgColor(maintenanceData?.cardState)} h-[230px] flex flex-col transition-all duration-200 cursor-pointer ${selectedMetric === 'maintenance' ? 'ring-2 ring-[#1A6988] shadow-lg' : 'hover:shadow-md'}`}
               onClick={() => handleTileClick('maintenance')}
             >
               <div className="flex-grow p-4 flex flex-col items-center justify-center">
-                <div className="text-lg font-medium text-center">Maintenance</div>
+                {isLoadingMaintenance ? (
+                  <div className="text-center">
+                    <div className="animate-pulse h-10 w-20 bg-gray-200 rounded mx-auto"></div>
+                  </div>
+                ) : !maintenanceData?.hasQRCodeFeedback ? (
+                  <div className="text-center text-gray-500">
+                    <div>No QR code feedback available</div>
+                  </div>
+                ) : maintenanceData.maintenanceStatsData.length === 0 ? (
+                  <div className="text-center text-green-600">
+                    <div>No maintenance issues</div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    {maintenanceData.maintenanceStatsData.map((stat, index) => (
+                      <div key={index} className="mb-2 text-center">
+                        <div className="text-4xl font-bold">
+                          {stat.StatValue}
+                        </div>
+                        <div className="text-sm mt-1">{stat.StatDescription}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="bg-[#1A6988] text-white py-3 px-4 h-[50px] flex items-center justify-center relative">
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-1 shadow-md flex items-center justify-center w-9 h-9">
                   <Image 
                     src="/images/dashboard-summary/maintenance-icon.svg" 
-                    alt="Maintenance" 
+                    alt="Maintenance Issues" 
                     width={18} 
                     height={18} 
                     className="object-contain" 
                   />
                 </div>
-                <div className="text-sm font-medium text-center mt-2">Maintenance</div>
+                <div className="text-sm font-medium text-center mt-2">Maintenance Issues</div>
               </div>
             </div>
             

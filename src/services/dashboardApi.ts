@@ -80,3 +80,115 @@ export const getCarbonImpactOffsetData = (estimatedWaterData: { StatValue: strin
     cardState: 'green_stats'
   };
 };
+
+export interface QRCodeFeedbackDetails {
+  feedbackName: string | null;
+  location: string | null;
+  totalMaintenanceLast3H: number | null;
+  totalCleaningLast3H: number | null;
+  totalOthersLast3H: number | null;
+  totalMaintenancePrior21H: number | null;
+  totalCleaningPrior21H: number | null;
+  totalOthersPrior21H: number | null;
+}
+
+export interface MaintenanceData {
+  maintenanceStatsData: { StatValue: string; StatDescription: string }[];
+  qrCodeFeedbackData: QRCodeFeedbackDetails[];
+  hasQRCodeFeedback: boolean;
+  cardState: string;
+}
+
+/**
+ * Fetches maintenance issues data from QR code feedback
+ * @param facilityId The ID of the facility to fetch data for
+ * @returns Object containing maintenance stats and UI state
+ */
+export const getMaintenanceData = async (facilityId: string | null): Promise<MaintenanceData> => {
+  try {
+    if (!facilityId) {
+      return {
+        maintenanceStatsData: [],
+        qrCodeFeedbackData: [],
+        hasQRCodeFeedback: false,
+        cardState: 'grey'
+      };
+    }
+
+    // Make API call to get QR code feedback data
+    const response = await fetch(`/api/qr-code-feedback?facilityId=${facilityId}`);
+    const data = await response.json();
+    
+    // Check if QR code feedback is available
+    const hasQRCodeFeedback = data.hasQRCodeFeedback;
+    
+    if (!hasQRCodeFeedback) {
+      return {
+        maintenanceStatsData: [],
+        qrCodeFeedbackData: [],
+        hasQRCodeFeedback: false,
+        cardState: 'grey'
+      };
+    }
+    
+    // Get the QR code feedback data
+    const qrCodeFeedbackData = data.qrCodeFeedbackList;
+    
+    // Calculate totals for different time periods
+    let totalIssuesReportedOnLast3Hours = 0;
+    let totalIssuesReportedOnPrior21Hours = 0;
+    
+    qrCodeFeedbackData.forEach((item: QRCodeFeedbackDetails) => {
+      totalIssuesReportedOnLast3Hours +=
+        Number(item.totalMaintenanceLast3H || 0) + 
+        Number(item.totalCleaningLast3H || 0) + 
+        Number(item.totalOthersLast3H || 0);
+      
+      totalIssuesReportedOnPrior21Hours +=
+        Number(item.totalMaintenancePrior21H || 0) + 
+        Number(item.totalCleaningPrior21H || 0) + 
+        Number(item.totalOthersPrior21H || 0);
+    });
+    
+    // Create stats data
+    const maintenanceStatsData: { StatValue: string; StatDescription: string }[] = [];
+    if (totalIssuesReportedOnLast3Hours > 0) {
+      maintenanceStatsData.push({
+        StatValue: totalIssuesReportedOnLast3Hours.toString().padStart(2, '0'),
+        StatDescription: 'Issue(s) in last 3h'
+      });
+    }
+    
+    if (totalIssuesReportedOnPrior21Hours > 0) {
+      maintenanceStatsData.push({
+        StatValue: totalIssuesReportedOnPrior21Hours.toString().padStart(2, '0'),
+        StatDescription: 'Issue(s) in last 24h'
+      });
+    }
+    
+    // Determine card state
+    let cardState = 'green';
+    if (totalIssuesReportedOnLast3Hours > 0) {
+      cardState = 'red_stats';
+    } else if (totalIssuesReportedOnPrior21Hours > 0) {
+      cardState = 'amber_stats';
+    } else {
+      cardState = 'green_stats';
+    }
+    
+    return {
+      maintenanceStatsData,
+      qrCodeFeedbackData,
+      hasQRCodeFeedback,
+      cardState
+    };
+  } catch (error) {
+    console.error('Error fetching maintenance data:', error);
+    return {
+      maintenanceStatsData: [],
+      qrCodeFeedbackData: [],
+      hasQRCodeFeedback: false,
+      cardState: 'grey'
+    };
+  }
+};

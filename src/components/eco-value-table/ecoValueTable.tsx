@@ -39,7 +39,7 @@ export const EcoValueTable = ({
     const currentData = mockData.slice(startIndex, endIndex);
 
     return (
-        <div className='mb-8 border border-gray-200 rounded-lg overflow-hidden' >
+        <div className='my-8 border border-gray-200 rounded-lg overflow-hidden' >
             <div className="col-span-12 bg-[#001f38] rounded-tl-2xl rounded-tr-2xl">
                 <h2 className="text-lg font-semibold text-white py-3 px-5">Current Value Status</h2>
             </div>

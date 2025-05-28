@@ -1,5 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { getEstimatedWaterSavingsData, WaterSavingsData, getCarbonImpactOffsetData } from '@/services/dashboardApi';
+import { 
+  getEstimatedWaterSavingsData, 
+  WaterSavingsData, 
+  getCarbonImpactOffsetData,
+  getMaintenanceData,
+  MaintenanceData
+} from '@/services/dashboardApi';
 
 /**
  * Hook to fetch water savings data for a specific facility
@@ -46,5 +52,21 @@ export const useCarbonImpactData = (
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
     enabled: !!waterSavingsData && (options?.enabled !== false),
+  });
+};
+
+/**
+ * Hook to fetch maintenance issues data for a specific facility
+ * @param facilityId - The ID of the facility to fetch data for
+ * @param options - Optional configuration for the query
+ * @returns Query result with maintenance issues data
+ */
+export const useMaintenanceData = (facilityId: string | null, options?: { enabled?: boolean }) => {
+  return useQuery<MaintenanceData, Error>({
+    queryKey: ['maintenanceIssues', facilityId],
+    queryFn: () => getMaintenanceData(facilityId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    enabled: facilityId !== '' && (options?.enabled !== false),
   });
 };
