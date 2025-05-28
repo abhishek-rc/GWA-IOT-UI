@@ -1,3 +1,4 @@
+// import { auth0 } from '@/lib/auth0';
 import { NextResponse } from 'next/server';
 
 /**
@@ -9,13 +10,17 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const facilityId = searchParams.get('facilityId');
     const weekInterval = searchParams.get('weekInterval') || '4'; // Default to 4 weeks
-    
+
     if (!facilityId) {
       return NextResponse.json({ error: 'facilityId is required' }, { status: 400 });
     }
-    
+    // const session = await auth0.getSession();
+    // let accessToken;
+    // if (session) {
+    //   accessToken = session.tokenSet.accessToken;
+    // }
     const API_URL = `${process.env.API_BASE_URL_DASHBOARD}/api/Consumption/AvgWaterConsumption?FacilityId=${facilityId}&WeekInterval=${weekInterval}`;
-    
+
     const response = await fetch(API_URL, {
       method: 'GET',
       headers: {
@@ -25,7 +30,7 @@ export async function GET(request: Request) {
       },
       cache: 'no-store'
     });
-    
+
     if (!response.ok) {
       const errorDetail = await response.text().catch(() => 'Unknown error');
       return NextResponse.json({ error: `API request failed with status ${response.status}`, detail: errorDetail }, { status: response.status });

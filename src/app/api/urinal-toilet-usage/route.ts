@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     if (!facilityId) {
       return errorResponse('Facility ID is required', 400);
     }
+    
 
     // Get environment variables
     const apiBaseUrl = process.env.API_BASE_URL_DASHBOARD;
