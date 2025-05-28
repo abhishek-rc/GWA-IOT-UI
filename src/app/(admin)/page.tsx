@@ -6,6 +6,7 @@ import WaterConsumptionChart from '@/components/building/WaterConsumptionChart';
 import UrinalToiletUsageChart from '@/components/building/UrinalToiletUsageChart';
 import { useBuildingData } from '@/hooks/useBuildingData';
 import DashboardSummary from '@/components/dashboard-summary/dashboard-summary';
+import BuildingSearchWrapper from '@/components/building/BuildingSearchWrapper';
 import { EcoValueTable } from '@/components/eco-value-table/ecoValueTable';
 import { AlertWarningsTable } from '@/components/alert-warnings-table/alertsWarningsTable';
 
@@ -46,24 +47,24 @@ export default function Ecommerce() {
     }
   }, [buildings, isLoading]);
 
-  // const handleBuildingSelect = (building: any) => {
-  //   const newSelectedBuilding = {
-  //     id: building.id,
-  //     name: building.name
-  //   };
-  //   setSelectedBuilding(newSelectedBuilding);
-  //   localStorage.setItem('selectedBuilding', JSON.stringify(newSelectedBuilding));
-  // };
+  const handleBuildingSelect = (building: any) => {
+    const newSelectedBuilding = {
+      id: building.id,
+      name: building.name,
+      customerId: building.customerId
+    };
+    setSelectedBuilding(newSelectedBuilding);
+    localStorage.setItem('selectedBuilding', JSON.stringify(newSelectedBuilding));
+  };
 
   return (
     <div className="container mx-auto px-4">
-      {/* Building Search Section
       <div className="mb-6">
         <BuildingSearchWrapper onBuildingSelect={handleBuildingSelect} />
-      </div> */}
+      </div>
 
       <div className="col-span-12 space-y-6">
-        <DashboardSummary />
+          {selectedBuilding && <DashboardSummary facilityId={selectedBuilding.id} buildingName={selectedBuilding?.name}/>}
       </div>
 
       {/* Main Content Area */}

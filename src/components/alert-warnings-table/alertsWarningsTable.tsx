@@ -14,7 +14,6 @@ export const AlertWarningsTable = ({
 }) => {
     // Mock data with realistic alert/warning data
     // const { data: alerts, isLoading } = useAnomoliesData(facilityId, userId);
-    console.log("data here>>>>>>>>>>>>>>>>>", alerts)
     const mockData = [
         ['High Water Usage Detected', 'Water Meter 1', 'Building A', '2025-05-28 10:00 AM'],
         ['Leak Detected', 'Pipe Sensor 2', 'Building A', '2025-05-28 09:30 AM'],

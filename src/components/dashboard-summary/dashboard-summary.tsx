@@ -1,10 +1,8 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useTotalWaterSavings } from '@/hooks/useDashboardSummary';
 import DashboardSummaryDetails from './dashboard-summary-detail';
-import BuildingSearchWrapper from '../building/BuildingSearchWrapper';
-import { Building } from '@/types/building';
 
 export type MetricType = 
   | 'waterSavings' 
@@ -15,42 +13,25 @@ export type MetricType =
   | 'carbonImpact' 
   | 'dolphinSystem' 
 
+  interface DashboardSummaryProps {
+    facilityId: string | null;
+    weekInterval?: number;
+    buildingName?: string;
+  }
 
-const DashboardSummary: React.FC = () => {
+const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildingName }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('waterSavings');
-  const [selectedFacility, setSelectedFacility] = useState<string>("31c03a25-3e33-11e9-82bc-86be77476276");
-  const [buildingName, setBuildingName] = useState<string>("1 Martin Place - G2");
+  // const [selectedFacility, setSelectedFacility] = useState<string>("31c03a25-3e33-11e9-82bc-86be77476276");
   
-  const { totalSavings, isLoading } = useTotalWaterSavings(selectedFacility);
-
-  useEffect(() => {
-    const savedBuilding = localStorage.getItem('selectedBuilding');
-    if (savedBuilding) {
-      try {
-        const building = JSON.parse(savedBuilding);
-        setSelectedFacility(building.id);
-        setBuildingName(building.name);
-      } catch (error) {
-        console.error('Error parsing saved building:', error);
-      }
-    }
-  }, []);
+  const { totalSavings, isLoading } = useTotalWaterSavings(facilityId);
 
   const handleTileClick = (metricId: MetricType) => {
     setSelectedMetric(metricId);
   };
 
-  const handleBuildingSelect = (building: Building) => {
-    setSelectedFacility(building.id);
-    setBuildingName(building.name);
-  };
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg bg-white p-4 shadow-sm">
-        <BuildingSearchWrapper onBuildingSelect={handleBuildingSelect} />
-      </div>
-      
+    <div className="space-y-6"> 
       <div className="grid grid-cols-12 rounded-2xl border border-gray-200 bg-white">
         <div className="col-span-12 bg-[#001f38] rounded-tl-2xl rounded-tr-2xl">
           <h2 className="text-lg font-semibold text-white py-3 px-5">
@@ -236,7 +217,7 @@ const DashboardSummary: React.FC = () => {
         <div className="col-span-12 xl:col-span-6 p-5">
           <DashboardSummaryDetails 
             selectedMetric={selectedMetric} 
-            facilityId={selectedFacility}
+            facilityId={facilityId}
           />
         </div>
       </div>
