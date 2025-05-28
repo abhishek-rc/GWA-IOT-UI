@@ -11,7 +11,7 @@ export interface WaterSavingsData {
   urinalToiletActivationRatio: number;
 }
 
-export const fetchWaterSavingsData = async (facilityId: string): Promise<WaterSavingsData> => {
+export const fetchWaterSavingsData = async (facilityId: string | null): Promise<WaterSavingsData> => {
   try {
     const response = await fetch(`/api/water-savings/${facilityId}`);
 
