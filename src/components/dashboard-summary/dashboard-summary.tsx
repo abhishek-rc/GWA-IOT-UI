@@ -1,7 +1,8 @@
 'use client'
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { useTotalWaterSavings } from '@/hooks/useDashboardSummary';
+import { useWaterSavingsData } from '@/hooks/useDashboardSummary';
+import { useCarbonImpactData } from '@/hooks/useDashboardSummary';
 import DashboardSummaryDetails from './dashboard-summary-detail';
 
 export type MetricType = 
@@ -21,9 +22,11 @@ export type MetricType =
 
 const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildingName }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('waterSavings');
-  // const [selectedFacility, setSelectedFacility] = useState<string>("31c03a25-3e33-11e9-82bc-86be77476276");
   
-  const { totalSavings, isLoading } = useTotalWaterSavings(facilityId);
+  const { data, isLoading } = useWaterSavingsData(facilityId);
+  const { data: carbonData, isLoading: isLoadingCarbon } = useCarbonImpactData(
+    data?.estimatedWaterSavingsData
+  );
 
   const handleTileClick = (metricId: MetricType) => {
     setSelectedMetric(metricId);
@@ -46,8 +49,8 @@ const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildin
             >
               <div className="flex-grow p-4 flex flex-col items-center justify-center">
                 <div className="text-4xl font-bold text-center">
-                  {!isLoading && totalSavings.toFixed(2)}
-                  <span className="text-sm ml-1">kL</span>
+                  {!isLoading && data?.estimatedWaterSavingsData[0].StatValue}
+                  <span className="text-sm ml-1">{data?.estimatedWaterSavingsData[0].StatDescription}</span>
                 </div>
               </div>
 
@@ -166,13 +169,21 @@ const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildin
               onClick={() => handleTileClick('carbonImpact')}
             >
               <div className="flex-grow p-4 flex flex-col items-center justify-center">
-                <div className="text-4xl font-bold text-center">
-                  631.90
-                  <span className="text-sm ml-1">kg</span>
-                </div>
-                <div className="text-sm mt-1 text-center">Carbon Impact</div>
-                <div className="text-sm mt-1 text-center">$12.64</div>
-                <div className="text-sm mt-1 text-center">Carbon Offset</div>
+                {isLoadingCarbon ? (
+                  <div className="text-center">
+                    <div className="animate-pulse h-10 w-20 bg-emerald-200 rounded mx-auto"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-4xl font-bold text-center">
+                      {carbonData?.carbonImpactData.toFixed(2)}
+                      <span className="text-sm ml-1">kg</span>
+                    </div>
+                    <div className="text-sm mt-1 text-center">Carbon Impact</div>
+                    <div className="text-sm mt-1 text-center">${carbonData?.carbonOffsetData.toFixed(2)}</div>
+                    <div className="text-sm mt-1 text-center">Carbon Offset</div>
+                  </>
+                )}
               </div>
 
               <div className="bg-[#1A6988] text-white py-3 px-4 h-[50px] flex items-center justify-center relative">
@@ -222,6 +233,7 @@ const DashboardSummary: React.FC<DashboardSummaryProps> = ({ facilityId, buildin
         </div>
       </div>
     </div>
+  
   );
 };
 
