@@ -14,36 +14,39 @@ interface WaterConsumptionChartProps {
 }
 
 const WaterConsumptionChart: React.FC<WaterConsumptionChartProps> = ({ facilityId, weekInterval = 4, buildingName = 'Building' }) => {
-  const { data, isLoading, isError, error } = useWaterConsumptionData(facilityId, weekInterval);
+  const { data, isLoading } = useWaterConsumptionData(facilityId, weekInterval);
 
-  // Early returns for different states
-  if (!facilityId) {
-    return <div className="p-6 text-center text-gray-500">Select a building to view water consumption data</div>;
-  }
-
+  // Show loading state
   if (isLoading) {
     return (
-      <div className="p-6 text-center">
-        <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto"></div>
-        <p className="mt-2 text-gray-600">Loading water consumption data...</p>
+      <div className="mb-8 border border-gray-200 rounded-lg mt-6 overflow-hidden">
+        <div className="bg-gradient-to-b from-[#001f38] to-[#001f38] text-white p-4">
+          <h2 className="text-xl font-medium">Total water usage - {buildingName}</h2>
+        </div>
+        <div className="p-6 text-center">
+          <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading water consumption data...</p>
+        </div>
       </div>
     );
   }
-
-  if (isError) {
+  
+  // If no facility is selected, show a message but maintain the component structure
+  if (!facilityId) {
     return (
-      <div className="p-6 text-center text-red-500">
-        Error loading water consumption data: {error instanceof Error ? error.message : 'Unknown error'}
+      <div className="mb-8 border border-gray-200 rounded-lg mt-6 overflow-hidden">
+        <div className="bg-gradient-to-b from-[#001f38] to-[#001f38] text-white p-4">
+          <h2 className="text-xl font-medium">Total water usage</h2>
+        </div>
+        <div className="p-6 text-center text-gray-500">
+          Select a building to view water consumption data
+        </div>
       </div>
     );
-  }
-
-  if (!data || data.length === 0) {
-    return <div className="p-6 text-center text-gray-500">No water consumption data available</div>;
   }
 
   // Process chart data - reverse to show in chronological order
-  const processedData = [...data].reverse();
+  const processedData = data && data.length > 0 ? [...data].reverse() : [];
   const dates = processedData.map(item => {
     const dateParts = item.date.split('-');
     return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`; // YYYY-MM-DD to DD-MM-YYYY

@@ -27,7 +27,7 @@ const RadialBarChart: React.FC<RadialBarChartProps> = ({
 
   // Only render on client side
   if (!isBrowser) {
-    return <div className="h-80 flex items-center justify-center">
+    return <div className="h-full flex items-center justify-center">
       <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto"></div>
     </div>;
   }
@@ -107,8 +107,8 @@ const RadialBarChart: React.FC<RadialBarChartProps> = ({
         height={height}
       />
       
-      {/* Custom legend with flex column layout at bottom left */}
-      <div className="absolute left-7 flex flex-col space-y-2">
+      {/* Custom legend with flex column layout at bottom */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row space-x-6">
         <div className="flex items-center">
           <span className="inline-block w-5 h-5 rounded-full" style={{ backgroundColor: actualColor }} aria-hidden="true"></span>
           <span className="text-md font-medium ml-2">{actualLabel}</span>

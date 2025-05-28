@@ -18,7 +18,7 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
   buildingName = 'Building'
 }) => {
   // Data fetching
-  const { data, isLoading, isError, error } = useUrinalToiletUsageData(facilityId, weekInterval);
+  const { data, isLoading } = useUrinalToiletUsageData(facilityId, weekInterval);
   
   // Chart container with consistent styling
   const renderContainer = (content: React.ReactNode) => (
@@ -30,43 +30,37 @@ const UrinalToiletUsageChart: React.FC<UrinalToiletUsageChartProps> = ({
     </div>
   );
 
-  // Loading state - show spinner outside the card
+  // If no facility is selected, show a message but maintain the component structure
   if (!facilityId) {
-    return <div className="p-6 text-center text-gray-500">Select a building to view urinal vs toilet usage data</div>;
+    return renderContainer(
+      <div className="h-80 flex items-center justify-center">
+        <p className="text-gray-500">Select a building to view urinal vs toilet usage data</p>
+      </div>
+    );
   }
   
+  // Loading state
   if (isLoading) {
-    return (
-      <div className="p-6 text-center">
+    return renderContainer(
+      <div className="h-80 flex items-center justify-center">
         <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto"></div>
         <p className="mt-2 text-gray-600">Loading urinal vs toilet usage data...</p>
       </div>
     );
   }
-
-  // Error state
-  if (isError) {
-    return renderContainer(
-      <div className="h-80 flex items-center justify-center">
-        <p className="text-red-500">
-          {error instanceof Error ? error.message : 'Error loading data'}
-        </p>
-      </div>
-    );
-  }
-
-  // No data state
-  if (!data) {
-    return renderContainer(
-      <div className="h-80 flex items-center justify-center">
-        <p className="text-gray-500">No data available</p>
-      </div>
-    );
-  }
+  
+  // Use the data from the hook or fallback to initial values if somehow data is undefined
+  const displayData = data || {
+    target: 0,
+    actual: 0,
+    toiletUsage: 0,
+    urinalUsage: 0,
+    percentageOfTarget: 0
+  };
 
   // Process data with safe defaults
-  const target = typeof data.target === 'number' ? data.target : 0;
-  const actual = typeof data.actual === 'number' ? data.actual : 0;
+  const target = typeof displayData.target === 'number' ? displayData.target : 0;
+  const actual = typeof displayData.actual === 'number' ? displayData.actual : 0;
   
   // Check if data is empty (both values are 0)
   const isEmptyData = target === 0 && actual === 0;

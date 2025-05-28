@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 // import BuildingSearchWrapper from "@/components/building/BuildingSearchWrapper";
 import WaterConsumptionChart from '@/components/building/WaterConsumptionChart';
 import UrinalToiletUsageChart from '@/components/building/UrinalToiletUsageChart';
+import HandWashDurationChart from '@/components/building/HandWashDurationChart';
+import AvgWaterPerVisitChart from '@/components/building/AvgWaterPerVisitChart';
+import HalfFlushPercentageChart from '@/components/building/HalfFlushPercentageChart';
 import { useBuildingData } from '@/hooks/useBuildingData';
 import DashboardSummary from '@/components/dashboard-summary/dashboard-summary';
 
@@ -62,8 +65,8 @@ export default function Ecommerce() {
           <DashboardSummary />
       </div>
       
-      {/* Main Content Area */}
-      <div className="grid grid-cols-12 gap-4 md:gap-6">
+      {/* Main Content Area - First Row */}
+      <div className="grid grid-cols-12 gap-4 md:gap-6 mb-6">
         {/* Water Consumption Chart */}
         <div className="col-span-12 lg:col-span-8">
           {selectedBuilding ? (
@@ -76,18 +79,63 @@ export default function Ecommerce() {
         </div>
         
         {/* Right side panel with Urinal vs Toilet Usage Chart */}
-        <div className="col-span-12 lg:col-span-4 space-y-4">
+        <div className="col-span-12 lg:col-span-4">
           {selectedBuilding ? (
-            <>
-              <UrinalToiletUsageChart 
-                facilityId={selectedBuilding.id}
-                buildingName={selectedBuilding.name}
-                weekInterval={4}
-              />
-            </>
+            <UrinalToiletUsageChart 
+              facilityId={selectedBuilding.id}
+              buildingName={selectedBuilding.name}
+              weekInterval={4}
+            />
           ) : (
             <div className="p-6 text-center text-gray-500 border border-gray-200 rounded-lg">
               <p>Select a building to view usage data</p>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Second Row - Hand Wash Duration Chart, Average Water Per Visit Chart, and Half Flush Percentage Chart */}
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        {/* Hand Wash Duration Chart */}
+        <div className="col-span-12 lg:col-span-4">
+          {selectedBuilding ? (
+            <HandWashDurationChart 
+              facilityId={selectedBuilding.id}
+              buildingName={selectedBuilding.name}
+              dayInterval={28}
+            />
+          ) : (
+            <div className="p-6 text-center text-gray-500 border border-gray-200 rounded-lg h-[420px] flex items-center justify-center">
+              <p>Select a building to view hand wash duration data</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Average Water Per Visit Chart */}
+        <div className="col-span-12 lg:col-span-4">
+          {selectedBuilding ? (
+            <AvgWaterPerVisitChart
+              facilityId={selectedBuilding.id}
+              buildingName={selectedBuilding.name}
+              weekInterval={4}
+            />
+          ) : (
+            <div className="p-6 text-center text-gray-500 border border-gray-200 rounded-lg h-[420px] flex items-center justify-center">
+              <p>Select a building to view average water usage data</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Half Flush Percentage Chart */}
+        <div className="col-span-12 lg:col-span-4">
+          {selectedBuilding ? (
+            <HalfFlushPercentageChart
+              facilityId={selectedBuilding.id}
+              buildingName={selectedBuilding.name}
+            />
+          ) : (
+            <div className="p-6 text-center text-gray-500 border border-gray-200 rounded-lg h-[420px] flex items-center justify-center">
+              <p>Select a building to view half flush percentage data</p>
             </div>
           )}
         </div>

@@ -14,26 +14,53 @@ export const useUrinalToiletUsageData = (facilityId: string | null, weekInterval
     queryKey: ['urinalToiletUsage', facilityId, weekInterval],
     queryFn: async (): Promise<UrinalToiletUsageData> => {
       if (!facilityId) {
-        throw new Error('Facility ID is required');
+        // Return initial values instead of throwing
+        return getInitialUrinalToiletData();
       }
 
-      const response = await fetch(`/api/urinal-toilet-usage?facilityId=${facilityId}&weekInterval=${weekInterval}`);
-      
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+      try {
+        const response = await fetch(`/api/urinal-toilet-usage?facilityId=${facilityId}&weekInterval=${weekInterval}`);
+        
+        if (!response.ok) {
+          console.error(`Urinal vs toilet API request failed with status ${response.status}`);
+          return getInitialUrinalToiletData();
+        }
+        
+        const data: UrinalToiletUsageResponse = await response.json();
+        
+        // Check if data is valid
+        if (!data || typeof data.target !== 'number' || typeof data.actual !== 'number') {
+          console.warn('Invalid data format received from urinal vs toilet API');
+          return getInitialUrinalToiletData();
+        }
+        
+        // Process the data for UI display
+        return {
+          ...data,
+          percentageOfTarget: data.target > 0 ? (data.actual / data.target) * 100 : 0
+        };
+      } catch (error) {
+        console.error('Error fetching urinal vs toilet usage data:', error);
+        // Return initial data instead of throwing
+        return getInitialUrinalToiletData();
       }
-      
-      const data: UrinalToiletUsageResponse = await response.json();
-      
-      // Process the data for UI display
-      return {
-        ...data,
-        percentageOfTarget: data.target > 0 ? (data.actual / data.target) * 100 : 0
-      };
     },
-    enabled: !!facilityId,
+    enabled: true, // Always enabled, will return initial data if facilityId is null
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
     refetchOnWindowFocus: false,
   });
 };
+
+/**
+ * Get initial urinal vs toilet usage data with zero values
+ */
+function getInitialUrinalToiletData(): UrinalToiletUsageData {
+  return {
+    target: 0,
+    actual: 0,
+    toiletUsage: 0,
+    urinalUsage: 0,
+    percentageOfTarget: 0
+  };
+}
